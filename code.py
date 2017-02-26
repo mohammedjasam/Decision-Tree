@@ -19,7 +19,10 @@ from IPython.display import Image
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-
+import sys
+from PyPDF2 import PdfFileMerger
+import os
+import subprocess
 """
 Data Engineering and Analysis
 """
@@ -40,6 +43,7 @@ targets = data_clean.SITE
 #Perform 5 fold cross validation
 kf = KFold(n_splits=5)
 # fold = 0
+i=1
 l=[] #list to store the accuracy values
 for training, testing in kf.split(targets):
     pred_train = predictors.ix[training]
@@ -61,17 +65,32 @@ for training, testing in kf.split(targets):
 
     #Generate Graphs for the Decision Classifier
     millis = int(round(time.time() * 1000))  # Generate time system time in milliseconds
-    Image(graph.write_pdf("graph"+str(millis)+".pdf"))
-
+    Image(graph.write_pdf(str(i)+".pdf"))
+    i+=1
     #Calculate accuracy
-    print("Accuracy Score for graph"+str(millis)+".pdf is")
+    print("Accuracy Score for graph"+str(millis)+".pdf")
     print(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
     l.append(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
     # f1_score(y_test, y_pred, average="macro")
 
 #Generating a list for accuracy
 l=[int(x) for x in l]
+a=0
+for i in range(len(l)):
+    a+=l[i]
+print(a/len(l))
 objects=('Fold 1','Fold 2','Fold 3','Fold 4','Fold 5')
 y_pos = np.arange(len(objects))
 plt.bar(y_pos, l)
 plt.show()
+
+pdfs = ['1.pdf', '2.pdf', '3.pdf', '4.pdf','5.pdf']
+merger = PdfFileMerger()
+for pdf in pdfs:
+    merger.append(open(pdf, 'rb'))
+with open('DecisionTrees.pdf', 'wb') as fout:
+    merger.write(fout)
+
+
+# subprocess.call('python pdf.py ',shell=True)
+sys.exit()
