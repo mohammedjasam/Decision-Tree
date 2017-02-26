@@ -66,11 +66,13 @@ for training, testing in kf.split(targets):
     #Generate Graphs for the Decision Classifier
     millis = int(round(time.time() * 1000))  # Generate time system time in milliseconds
     Image(graph.write_pdf(str(i)+".pdf"))
-    i+=1
+
     #Calculate accuracy
-    print("Accuracy Score for graph"+str(millis)+".pdf")
-    print(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
     l.append(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
+    print("Accuracy Score is "+str(l[i-1]))
+    i+=1
+    #  print(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
+    # l.append(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
     # f1_score(y_test, y_pred, average="macro")
 
 #Generating a list for accuracy
@@ -78,7 +80,7 @@ l=[int(x) for x in l]
 a=0
 for i in range(len(l)):
     a+=l[i]
-print(a/len(l))
+print('The average accuracy after 5 Fold Cross Validation is '+str(a/len(l)))
 objects=('Fold 1','Fold 2','Fold 3','Fold 4','Fold 5')
 y_pos = np.arange(len(objects))
 plt.bar(y_pos, l)
