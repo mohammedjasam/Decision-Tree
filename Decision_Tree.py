@@ -1,7 +1,11 @@
-from pandas import Series, DataFrame
+### Scripted by Mohammed Jasam ###
+### mnqnd@mst.edu
+
+
 import pandas as pd
 import numpy as np
 import os
+import csv
 import matplotlib.pylab as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -11,10 +15,10 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.model_selection import KFold
 import IPython
+import matplotlib.pyplot as plt
+import csv
 from sklearn import tree
-#from StringIO import StringIO
 from io import StringIO
-#from StringIO import StringIO
 from IPython.display import Image
 import time
 import numpy as np
@@ -45,18 +49,61 @@ kf = KFold(n_splits=5)
 # fold = 0
 i=1
 l=[] #list to store the accuracy values
-for training, testing in kf.split(targets):
-    pred_train = predictors.ix[training]
-    tar_train = targets[training]
-    pred_test = predictors.ix[testing]
-    tar_test = targets[testing]
+
+test=[]
+train=[]
+
+# Running the 5 Fold Cross Validation!
+def getValues(count):
+    if count==1:
+        for i in range(100):
+            if 0<=i<20:
+                test.append(i)
+            else:
+                train.append(i)
+    if count==2:
+        for i in range(100):
+            if 20<=i<40:
+                test.append(i)
+            else:
+                train.append(i)
+    if count==3:
+        for i in range(100):
+            if 40<=i<60:
+                test.append(i)
+            else:
+                train.append(i)
+    if count==4:
+        for i in range(100):
+            if 60<=i<80:
+                test.append(i)
+            else:
+                train.append(i)
+    if count==5:
+        for i in range(100):
+            if 80<=i<100:
+                test.append(i)
+            else:
+                train.append(i)
+    return test,train
+
+# Loop runs 5 times to simulate the 5 Fold Cross Validation!
+print('\n')
+print("                       THE DECISION TREE ANALYSIS")
+for x in range(5):
+    test=[]
+    train=[]
+    # print(testing)
+    test,train=getValues(x+1)
+    pred_train = predictors.ix[train]
+    tar_train = targets[train]
+    pred_test = predictors.ix[test]
+    tar_test = targets[test]
 
     #Build model on training data
     classifier=DecisionTreeClassifier()
     classifier=classifier.fit(pred_train,tar_train)
     predictions=classifier.predict(pred_test)
-    print(sklearn.metrics.confusion_matrix(tar_test,predictions))
-
     #Displaying the decision tree
     out = StringIO()
     tree.export_graphviz(classifier, out_file=out)
@@ -67,25 +114,56 @@ for training, testing in kf.split(targets):
     millis = int(round(time.time() * 1000))  # Generate time system time in milliseconds
     Image(graph.write_pdf(str(i)+".pdf"))
 
+    print("===========================================================")
+    print('Iteration #'+str(x+1)+'\n')
     #Calculate accuracy
     l.append(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
-    print("Accuracy Score is "+str(l[i-1]))
+    print("Accuracy Score is "+str(l[i-1])+ '%')
     i+=1
-    #  print(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
-    # l.append(sklearn.metrics.accuracy_score(tar_test, predictions)*100)
-    # f1_score(y_test, y_pred, average="macro")
 
+    print(sklearn.metrics.confusion_matrix(tar_test,predictions))
+    print(classification_report(tar_test,predictions))
 #Generating a list for accuracy
 l=[int(x) for x in l]
+with open("DecisionTree_Accuracy.csv", "w") as fp_out:
+    writer = csv.writer(fp_out, delimiter=",")
+    writer.writerow(l)
 a=0
 for i in range(len(l)):
     a+=l[i]
-print('The average accuracy after 5 Fold Cross Validation is '+str(a/len(l)))
-objects=('Fold 1','Fold 2','Fold 3','Fold 4','Fold 5')
-y_pos = np.arange(len(objects))
-plt.bar(y_pos, l)
+# print(a)
+print("===========================================================")
+print("===========================================================")
+print('The average accuracy after 5 Fold Cross Validation is: '+str(int(a/len(l)))+"%")
+print("===========================================================")
+print("===========================================================")
+
+
+### VISUALIZING THE ACCURACY DATA ###
+# data to plot
+n_groups = 5
+
+# create plot
+fig, ax = plt.subplots()
+index = np.arange(n_groups)
+bar_width = 0.35
+opacity = 0.8
+
+rects2 = plt.bar(index + bar_width, l, bar_width,
+                 alpha=opacity,
+                 color='g',
+                 label='Decision Tree')
+
+plt.xlabel('Folds')
+plt.ylabel('Accuracy')
+plt.title('Accuracy by Decision Tree')
+plt.xticks(index + bar_width, ('1', '2', '3', '4','5'))
+plt.legend()
+
+plt.tight_layout()
 plt.show()
 
+# Merging the Decision Tree graphs to clean the directory!
 pdfs = ['1.pdf', '2.pdf', '3.pdf', '4.pdf','5.pdf']
 merger = PdfFileMerger()
 for pdf in pdfs:
@@ -94,5 +172,4 @@ with open('DecisionTrees.pdf', 'wb') as fout:
     merger.write(fout)
 
 
-# subprocess.call('python pdf.py ',shell=True)
 sys.exit()
